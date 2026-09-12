@@ -38,8 +38,11 @@ source "$CC_HOME/lib/console.zsh"
 # macOS/Linux locale environment it never shows.
 _cc_want="$(cc_resolve_lang)"
 if [ -z "$_cc_want" ]; then
+  _cc_want=""
+  # NOT in a command substitution: see the note on cc_pick_language. It renders
+  # to the terminal and reads the keyboard, so its stdout must stay the tty.
   if [ "${DSH_NO_FZF:-0}" != "1" ] && [ -t 0 ] && [ -t 1 ] && [ ! -f "$(cc_lang_file)" ]; then
-    _cc_want="$(cc_pick_language)"
+    cc_pick_language && _cc_want="$CC_PICKED_LANG"
   fi
   [ -z "$_cc_want" ] && _cc_want=en
 fi

@@ -188,9 +188,18 @@ open_it() {
 }
 
 # --- language ----------------------------------------------------------------
-# First-run picker. Only reached when neither an explicit override, a stored
-# preference, nor the environment could decide.
+# First-run / on-demand picker. Only reached when neither an explicit override, a
+# stored preference, nor the environment could decide.
+#
+# The result lands in $CC_PICKED_LANG and this must NEVER be called as
+# `x="$(cc_pick_language)"`. A command substitution makes stdout a pipe, which
+# breaks both halves of the picker at once: the `[ -t 1 ]` guard falls through
+# so fzf is never used, and the plain-prompt fallback writes its text into the
+# capture instead of the screen while `read` blocks on input the user cannot
+# see. The symptom is a blank console that never comes back.
+CC_PICKED_LANG=""
 cc_pick_language() {
+  CC_PICKED_LANG=""
   local choice=""
   if command -v fzf >/dev/null 2>&1 && [ -t 0 ] && [ -t 1 ]; then
     choice="$(printf '%s\n' \
@@ -210,20 +219,18 @@ cc_pick_language() {
     case "$n" in (2|zh) choice=zh ;; (1|en) choice=en ;; esac
   fi
   case " ${SUPPORTED_LANGS[*]} " in
-    (*" $choice "*) printf '%s' "$choice" ;;
-    (*)             printf '' ;;
+    (*" $choice "*) CC_PICKED_LANG="$choice"; return 0 ;;
+    (*)             return 1 ;;
   esac
 }
 
 do_language() {
-  local choice
-  choice="$(cc_pick_language)"
-  if [ -z "$choice" ]; then
-    warn "$(printf "${MSG[msg.cancelled]}")"
+  if ! cc_pick_language; then
+    warn "${MSG[msg.cancelled]}"
     return 0
   fi
-  cc_store_lang "$choice"
-  cc_load_messages "$choice"
+  cc_store_lang "$CC_PICKED_LANG"
+  cc_load_messages "$CC_PICKED_LANG"
   ok "${MSG[lang.saved]}"
 }
 

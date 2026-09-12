@@ -45,6 +45,7 @@
     "verify": "python3 scripts/verify-i18n.py && python3 scripts/verify-readme-pair.py",
     "verify:i18n": "python3 scripts/verify-i18n.py",
     "verify:readme": "python3 scripts/verify-readme-pair.py",
-    "build:macos": "install/install-macos.sh --app-only"
+    "build:macos": "install/install-macos.sh --app-only",
+    "test": "scripts/smoke-test.sh"
   }
 }
