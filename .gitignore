@@ -1,0 +1,14 @@
+# --- things this repo should never carry -------------------------------------
+.DS_Store
+*.swp
+node_modules/
+
+# build output from install/build-app.sh
+build/
+dist/
+*.icns
+*.iconset/
+*.app/
+
+# per-machine console state
+.lang

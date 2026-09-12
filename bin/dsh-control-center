@@ -1,0 +1,48 @@
+#!/bin/zsh
+# =============================================================================
+#  dsh-control-center — terminal control center for DeepSeek Harness (`dsh`)
+#
+#  Interactive :  dsh-control-center
+#  Direct      :  dsh-control-center <action> [args]
+#                 start|stop|restart|open|status|version|update|logs
+#                 headless [task] | plugins [list|add|remove|update]
+#                 config|workspace|docs|language|help
+#
+#  Env:  DSH_LANG=en|zh     force the console language (skips detection)
+#        DSH_NO_BROWSER=1   never open a browser
+#        DSH_NO_SPLASH=1    skip the intro animation
+#        DSH_NO_FZF=1       plain numbered menu instead of fzf
+#        DSH_PORT=3080      port the Web UI listens on
+#        DSH_PROFILE=web    profile used by plugin commands
+#        DSH_WORKSPACE=...  folder opened by "workspace"
+#        DSH_CC_HOME=...    where this console stores its own preferences
+# =============================================================================
+set -u
+
+CC_BIN="${0:A}"
+CC_HOME="${CC_BIN:h:h}"
+export CC_BIN CC_HOME
+export DSH_CC_HOME="${DSH_CC_HOME:-$HOME/.dsh-control-center}"
+
+source "$CC_HOME/lib/i18n.zsh"
+
+# Load every locale file, then pick one.
+for f in "$CC_HOME"/locales/*.zsh(N); do source "$f"; done
+
+# Provisional English, so the language picker itself has copy to render with.
+cc_load_messages en
+source "$CC_HOME/lib/console.zsh"
+
+# Explicit override > stored preference > environment > (first run) ask > en.
+# The picker only ever appears when nothing above could decide: with a normal
+# macOS/Linux locale environment it never shows.
+_cc_want="$(cc_resolve_lang)"
+if [ -z "$_cc_want" ]; then
+  if [ "${DSH_NO_FZF:-0}" != "1" ] && [ -t 0 ] && [ -t 1 ] && [ ! -f "$(cc_lang_file)" ]; then
+    _cc_want="$(cc_pick_language)"
+  fi
+  [ -z "$_cc_want" ] && _cc_want=en
+fi
+cc_load_messages "$_cc_want"
+
+cc_main "$@"

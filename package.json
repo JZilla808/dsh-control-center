@@ -1,0 +1,50 @@
+{
+  "name": "dsh-control-center",
+  "version": "0.1.0",
+  "description": "Terminal control center for DeepSeek Harness (dsh): start/stop the Web UI, run headless tasks, manage plugins, read logs, update the CLI — without memorising commands.",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "tui",
+    "control-center",
+    "terminal",
+    "fzf",
+    "launcher"
+  ],
+  "license": "MIT",
+  "author": "Jay Zhou",
+  "homepage": "https://github.com/jbeazy/dsh-control-center",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jbeazy/dsh-control-center.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jbeazy/dsh-control-center/issues"
+  },
+  "bin": {
+    "dsh-control-center": "bin/dsh-control-center"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "locales",
+    "scripts",
+    "install",
+    "assets",
+    "README.md",
+    "README.zh.md",
+    "README.i18n.yaml",
+    "LICENSE"
+  ],
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "scripts": {
+    "verify": "python3 scripts/verify-i18n.py && python3 scripts/verify-readme-pair.py",
+    "verify:i18n": "python3 scripts/verify-i18n.py",
+    "verify:readme": "python3 scripts/verify-readme-pair.py",
+    "build:macos": "install/install-macos.sh --app-only"
+  }
+}
