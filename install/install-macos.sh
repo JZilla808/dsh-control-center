@@ -6,9 +6,10 @@
 #  Terminal window running the console, carrying a proper macOS icon.
 #
 #  Usage:
-#    install/install-macos.sh                  install to ~/Applications
-#    install/install-macos.sh --dir /Applications
-#    install/install-macos.sh --app-only       build into ./build, do not install
+#    install/install-macos.sh                       install to ~/Applications
+#    install/install-macos.sh --dir /Applications   install somewhere else
+#    install/install-macos.sh --app-only            build into ./build, do not install
+#    install/install-macos.sh --icon PATH           use your own 1024x1024 artwork
 #
 #  The icon is generated from assets/generate-icon.swift when Swift is
 #  available, so the committed artwork stays reproducible rather than being a
@@ -20,12 +21,14 @@ ROOT="${0:A:h:h}"
 APP_NAME="DSH Control Center"
 DEST_DIR="$HOME/Applications"
 APP_ONLY=0
+ICON_SRC=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --dir)      DEST_DIR="$2"; shift 2 ;;
     --app-only) APP_ONLY=1; shift ;;
-    -h|--help)  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --icon)     ICON_SRC="$2"; shift 2 ;;
+    -h|--help)  sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *)          echo "unknown option: $1" >&2; exit 2 ;;
   esac
 done
@@ -51,8 +54,18 @@ BUILD="$ROOT/build"
 rm -rf "$BUILD"
 mkdir -p "$BUILD"
 
+# Icon source. The default is the project's own mark. `--icon PATH` swaps in a
+# personal one for a private build: the shipped artwork deliberately uses no
+# DeepSeek brand asset, because DeepSeek's brand guidelines ask third-party
+# projects not to present official artwork as their own identity. That rule
+# governs distribution — a build you keep for yourself can use whatever you like.
 MASTER="$ROOT/assets/icon-1024.png"
-if command -v swift >/dev/null 2>&1; then
+if [ -n "$ICON_SRC" ]; then
+  [ -f "$ICON_SRC" ] || die "icon not found: $ICON_SRC"
+  cp "$ICON_SRC" "$BUILD/icon-1024.png"
+  MASTER="$BUILD/icon-1024.png"
+  say "using a custom icon: $ICON_SRC"
+elif command -v swift >/dev/null 2>&1; then
   say "generating icon artwork…"
   swift "$ROOT/assets/generate-icon.swift" "$MASTER" >/dev/null || die "icon generation failed"
 elif [ ! -f "$MASTER" ]; then
