@@ -1,5 +1,5 @@
 # Bilingual-pair consistency record: the git blob hash of each side as of
 # the last confirmed-consistent state. After editing either side, bring the
 # other along and re-record with:  scripts/verify-readme-pair.py --write
-README.md: a89c8036cbbd1314e08f1eb0119e2d8d811a3556
-README.zh.md: 6a7379af5d497255831871c3addaffc6e5f19be3
+README.md: a073bacba6d5f70c2d493f6877351929c2f109de
+README.zh.md: 6e2f043e6bf668daf44ea91e56424576db6a4529

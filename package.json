@@ -14,13 +14,13 @@
   ],
   "license": "MIT",
   "author": "Jay Zhou",
-  "homepage": "https://github.com/jbeazy/dsh-control-center",
+  "homepage": "https://github.com/JZilla808/dsh-control-center",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jbeazy/dsh-control-center.git"
+    "url": "git+https://github.com/JZilla808/dsh-control-center.git"
   },
   "bugs": {
-    "url": "https://github.com/jbeazy/dsh-control-center/issues"
+    "url": "https://github.com/JZilla808/dsh-control-center/issues"
   },
   "bin": {
     "dsh-control-center": "bin/dsh-control-center"

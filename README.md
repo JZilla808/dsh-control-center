@@ -27,7 +27,7 @@ npm install -g dsh-control-center
 Or run it straight from a checkout:
 
 ```sh
-git clone https://github.com/jbeazy/dsh-control-center.git
+git clone https://github.com/JZilla808/dsh-control-center.git
 cd dsh-control-center
 ./bin/dsh-control-center
 ```
