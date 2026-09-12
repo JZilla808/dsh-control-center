@@ -411,7 +411,7 @@ do_plugins() {
             [ -z "$pkg" ] && { warn "${MSG[msg.cancelled]}"; return 0; }
             dsh plugin --profile "$PROFILE" remove "$pkg" ;;
     update) dsh plugin --profile "$PROFILE" update ;;
-    *)      plugins_menu ;;
+    *)      plugins_menu; return $? ;;
   esac
 }
 
@@ -444,10 +444,13 @@ do_docs() {
 do_quit() { return 0 }
 
 # --- plugins submenu ---------------------------------------------------------
+# Returns 0 when it ran an action (and paused for it itself), 1 when the user
+# backed out or the submenu could not be shown -- the caller uses that to decide
+# whether another "press Enter" is warranted.
 plugins_menu() {
   if [ "${DSH_NO_FZF:-0}" = "1" ] || ! command -v fzf >/dev/null 2>&1; then
     warn "${MSG[pl.unsupported]}"
-    return 0
+    return 1
   fi
   local items=(
     "list|${A_ACC}${C_B}≡${C_R}   ${A_TEXT}${MSG[pl.list]}${C_R}"
@@ -463,15 +466,16 @@ plugins_menu() {
       --border-label=" ◈  ${MSG[screen.plugins]} · $PROFILE " --border-label-pos=3 \
       --padding=1 --prompt='  ▸ ' --pointer='▶' --marker='✓' \
       --header="  ${A_MUT}$(printf "${MSG[pl.which]}" "$PROFILE")${C_R}" --header-first \
-      --info=inline-right --color="$FZF_COLORS")" || return 0
-  [ -z "$sel" ] && return 0
+      --info=inline-right --color="$FZF_COLORS")" || return 1
+  [ -z "$sel" ] && return 1
   id="${sel%%|*}"
-  [ "$id" = back ] && return 0
+  [ "$id" = back ] && return 1
   screen_header "▣" "${MSG[screen.plugins]} · $id"
   info "dsh plugin --profile $PROFILE $id"
   say ""
   do_plugins "$id"
   pause
+  return 0
 }
 
 # --- preview pane ------------------------------------------------------------
@@ -598,8 +602,15 @@ interactive() {
     [ "$id" = "quit" ] && break
     clear
     run_action "$id"
-    if [ "$id" = "language" ]; then build_menu; continue; fi
-    pause
+    case "$id" in
+      # Both of these own their own follow-up: the language picker redraws the
+      # menu in the new locale, and the plugins submenu pauses for itself once
+      # it has actually run something. Pausing here too would charge the user a
+      # second keypress for nothing.
+      language) build_menu; continue ;;
+      plugins)  continue ;;
+      *)        pause ;;
+    esac
   done
   clear
   printf '\n  %s%s%s\n' "$A_MUT" "${MSG[misc.exit_thanks]}" "$C_R"

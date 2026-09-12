@@ -43,7 +43,13 @@ property profileName : "Deep Sea"
 property windowCols : 110
 property windowRows : 32
 
-set launchCmd to "exec " & quoted form of ccBin
+-- Deliberately NOT `exec`. With exec the console REPLACES the login shell, so
+-- when it exits the tab dies and Terminal is left holding a window whose tab is
+-- `missing value` -- a state AppleScript cannot close at all. Run as a child
+-- instead: the shell survives, the tab stays valid and idle, and the detached
+-- close-window helper has something it can actually close. Worst case the user
+-- lands on a usable shell prompt rather than a dead "[Process completed]" tab.
+set launchCmd to "/bin/zsh " & quoted form of ccBin
 
 if (do shell script "/bin/test -x " & quoted form of ccBin & " && echo yes || echo no") is not "yes" then
 	display alert "DSH Control Center not found" message "Missing executable:" & return & return & ccBin & return & return & "Reinstall it with: npm install -g dsh-control-center" as critical
